@@ -1,0 +1,12 @@
+{
+  "name": "pokergcs",
+  "description": "A ground control station based on node.js and now.js",
+  "author": "Rayjan Wilson <rayjan.wilson@alaska.edu>",
+  "dependencies": {
+    "now": "0.8.x"
+  },
+  "devDependencies": {
+    "vows": "0.5.x"
+  },
+  "engine": "node >= 0.6.15"
+}
