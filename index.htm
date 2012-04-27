@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Prototype Poker Flat Ground Station with NowJS And Node.js Realtime Communication</title>
+ 
+	<style type="text/css">
+ 
+		html,
+		body {
+			height: 100% ;
+			overflow: hidden ;
+			width: 100% ;
+			}
+ 
+		img {
+			left: 9px ;
+			position: absolute ;
+			top: 70px ;
+			}
+ 
+	</style>
+ 
+	<!-- We have this file stored explicitly. -->
+	<script type="text/javascript" src="js/jquery-1.7.2.min.js"/></script>
+ 
+	<!--
+		The NowJS HTTP augmentation will take care of routing
+		this - we don't actually have this physical file stored
+		at this file path.
+	-->
+	<script type="text/javascript" src="http://localhost:8080/nowjs/now.js"></script>
+</head>
+<body>
+ 
+	<h1>
+		NowJS And Node.js Realtime Communication
+	</h1>
+ 
+	<!--
+		This will be draggable. When this image drags, we are
+		going to sync the position of it across browsers.
+	-->
+	<img
+		id="uav"
+		src="img/uav.jpeg"
+		width="100"
+		height="100"
+		alt="some uavs."
+		/>
+ 
+ 
+	<!-- Configure the client-side script. -->
+	<script type="text/javascript">
+ 
+		// Get a reference to the target draggable.
+		var uav = $( "#uav" );
+ 
+		// Get a reference to the body - this is the element on which
+		// we'll be tracking mouse movement once the draggable
+		// tracking has been turned on.
+		var body = $( "body" );
+ 
+ 
+		// On mouse-down, turn on draggability.
+		uav.mousedown(
+			function( event ){
+				// Prevent the default behavior.
+				event.preventDefault();
+ 
+				// Get the current position of the mouse within the
+				// bounds of the target.
+				var localOffset = {
+					x: (event.pageX - uav.position().left),
+					y: (event.pageY - uav.position().top)
+				};
+ 
+				// Start tracking the mouse movement on the body.
+				// We're tracking on the body so that the mouse can
+				// move faster than the tracking.
+				body.mousemove(
+					function( event ){
+						// Create a new position object.
+						var newPosition = {
+							left: (event.pageX - localOffset.x),
+							top: (event.pageY - localOffset.y)
+						};
+ 
+						// Update the target position locally.
+						uav.css( newPosition );
+ 
+						// Announce the updated position so that we
+						// can sync accross all clients with NowJS.
+						now.syncPosition( newPosition );
+					}
+				);
+			}
+		);
+ 
+ 
+		// On mouse-up, turn off draggability.
+		uav.mouseup(
+			function( event ){
+				// Unbind the mousemove - no need to track movement
+				// once the mouse has been lifted.
+				body.unbind( "mousemove" );
+			}
+		);
+ 
+ 
+		// I allow the remove server to make a request to update the
+		// position of the target.
+		//
+		// NOTE: By defining this function in the NOW scope, it gives
+		// the server access to it as well.
+		now.updatePosition = function( newPosition ){
+ 
+			// Check to see if this client is in master mode; if so,
+			// we won't update the position as this client is
+			// actively updating its own position.
+			uav.css( newPosition );
+ 
+		};
+ 
+	</script>
+ 
+</body>
+</html>
