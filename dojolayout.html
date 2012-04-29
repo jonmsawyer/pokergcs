@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<!--
+Author: Jonathan Sawyer
+Copyright (C) 2012, Poker Flat Research Range, University of Alaska Fairbanks
+All rights reserved. You may not use any portion of this code without prior written
+permission from the Poker Flat Research Range or the University of Alaska
+Fairbanks.
+-->
+<html lang="en">
+<head>
+    <meta name="author" content="Jonathan Sawyer (jmsawyer(@)alaska.edu)" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    
+    <title>Poker Flat Web Cams</title>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.11/OpenLayers.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/mootools/1.4.1/mootools-yui-compressed.js"></script>
+    <!-- Dojo -->
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dijit/themes/claro/claro.css" media="screen" />
+    <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dojo/dojo.js"
+            data-dojo-config="isDebug: true, parseOnLoad: true"></script>
+    <script>
+    // Layout
+    dojo.require('dijit.layout.BorderContainer');
+    dojo.require('dijit.layout.ContentPane');
+    </script>
+
+    <style>
+    html, body, div#appLayout { height: 100%; margin: 0; }
+    div#appLayoutTop,
+    div#appLayoutCenter,
+    div#appLayoutBottom,
+    div#appLayoutBottom .dijitContentPane {
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+        padding: 3px;
+    }
+    .roundBorder {
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+    }
+    div#appLayoutLeft { margin: 0; width: 82px; }
+    div#appLayoutBottom { padding: 10px; margin: 0; }
+    div#appLayoutStatusContainer { height: 48px; }
+    div#appLayoutPayloadContainer { width: 50%; overflow: hidden; }
+    div#appLayoutPayloadContainer.hidden { display: none; }
+    div#appLayoutPayloadControls,
+    div#appLayoutMapControls { height: 48px; }
+    div#appLayoutStatusHideShowPayload { padding: 0; overflow: hidden; height: 48px; width: 48px; }
+    div#appLayoutStatusHideShowPayload.hide { background-image: url('img/hide_payload.png'); }
+    div#appLayoutStatusHideShowPayload.show { background-image: url('img/show_payload.png'); }
+    div#appLayoutMapContainer.expanded { width: auto; }
+    
+    html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, code, del, dfn, em, img, q, dl, dt, dd, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {margin:0;padding:0;border:0;font-weight:inherit;font-style:inherit;font-size:100%;font-family:inherit;vertical-align:baseline;}
+    /*body {line-height:1.5;}*/
+    table {border-collapse:separate;border-spacing:0;}
+    caption, th, td {text-align:left;font-weight:normal;}
+    table, td, th {vertical-align:middle;}
+    blockquote:before, blockquote:after, q:before, q:after {content:"";}
+    blockquote, q {quotes:"" "";}
+    a img {border:none;}
+    .inline { display: inline; }
+    .nomargin { margin: 0; }
+    .floatleft { float: left; }
+    .floatright { float: right; }
+    .floatleft { float: left; }
+    .floatright { float: right; }
+    .bold { font-weight: bold; }
+    .clearleft { clear: left; }
+    .clearright { clear: right; }
+    .clearboth { clear: both; }
+    .id { font-family: 'Courier New', monospace; }
+    .green { color: #0a0; }
+    .red { color: #a00; }
+    .yellow { color: #ffa812; }
+    .aligncenter { text-align: center; }
+    .alignleft { text-align: left; }
+    .alignright { text-align: right; }
+    table.aligncenter { margin: 0 auto; }
+    table.alignleft { margin: 0 auto 0 0; }
+    table.alignright { margin: 0 0 0 auto; }
+    </style>
+    
+    <script type="text/javascript">
+    dojo.ready(function() {
+      var map = new OpenLayers.Map({
+          div: "appLayoutMap",
+          theme: null,
+          controls: [
+              new OpenLayers.Control.Attribution(),
+              new OpenLayers.Control.TouchNavigation({
+                  dragPanOptions: {
+                      enableKinetic: true
+                  }
+              }),
+              new OpenLayers.Control.ZoomPanel()
+          ],
+          layers: [
+              new OpenLayers.Layer.OSM("OpenStreetMap", null, {
+                  transitionEffect: "resize"
+              })
+          ],
+          center: new OpenLayers.LonLat(0, 0),
+          zoom: 1
+      });
+      
+      var status = $('appLayoutStatusHideShowPayload');
+      var payload = $('appLayoutPayloadContainer');
+      var mapContainer = $('appLayoutMapContainer');
+      window.payloadDom = dijit.byId('appLayoutPayloadContainer');
+      status.addEvent('click', function() {
+          payload.toggleClass('hidden');
+          status.toggleClass('show');
+          status.toggleClass('hide');
+      });
+      
+      $$('.app_button').each(function(btn) { btn.addEvent('click', function(evt) { alert('hi, you clicked an app button!'); }); });
+    });
+    </script>
+</head>
+<body class="claro">
+    <div id="appLayout"
+         data-dojo-type="dijit.layout.BorderContainer"
+         data-dojo-props="design: 'headline'"
+     >
+        <div id="appLayoutLeft"
+             data-dojo-type="dijit.layout.ContentPane"
+             data-dojo-props="region: 'left'"
+        >
+            App buttons<br />
+            <img src="img/app_icon.png" class="app_button" /><br />
+            <img src="img/app_icon.png" class="app_button" /><br />
+            <img src="img/app_icon.png" class="app_button" /><br />
+            <img src="img/app_icon.png" class="app_button" /><br />
+            <img src="img/app_icon.png" class="app_button" />
+        </div>
+
+        <div id="appLayoutCenter"
+             data-dojo-type="dijit.layout.BorderContainer"
+             data-dojo-props="region: 'center', design: 'headline'"
+        >
+            <div id="appLayoutMapContainer"
+                 data-dojo-type="dijit.layout.BorderContainer"
+                 data-dojo-props="region: 'center', design: 'headline'"
+            >
+                <div id="appLayoutMap"
+                     data-dojo-type="dijit.layout.ContentPane"
+                     data-dojo-props="region: 'center'"
+                >
+                </div>
+                <div id="appLayoutMapControls"
+                     data-dojo-type="dijit.layout.ContentPane"
+                     data-dojo-props="region: 'bottom'"
+                >
+                    Map controls and options go here
+                </div>
+            </div>
+            <div id="appLayoutPayloadContainer"
+                 data-dojo-type="dijit.layout.BorderContainer"
+                 data-dojo-props="region: 'right'"
+            >
+                <div id="appLayoutPayload"
+                     data-dojo-type="dijit.layout.ContentPane"
+                     data-dojo-props="region: 'center'"
+                >
+                    Payload (video feed?) goes here:
+                    <iframe width="600" height="450" src="http://www.youtube.com/embed/85Kd8kEq44k" frameborder="0" allowfullscreen></iframe>
+                </div>
+                <div id="appLayoutPayloadControls"
+                     data-dojo-type="dijit.layout.ContentPane"
+                     data-dojo-props="region: 'bottom'"
+                >
+                    Payload controls and options go here
+                </div>
+            </div>
+            <div id="appLayoutStatusContainer"
+                 data-dojo-type="dijit.layout.BorderContainer"
+                 data-dojo-props="region: 'bottom', design: 'headline'"
+            >
+                <div id="appLayoutStatus"
+                     data-dojo-type="dijit.layout.ContentPane"
+                     data-dojo-props="region: 'center'"
+                >
+                    Status: Lat, Lon, Alt, Speed, Battery, Temp,
+                    Azimuth, Roll, Pitch, Yaw
+                </div>
+                <div id="appLayoutStatusHideShowPayload"
+                     data-dojo-type="dijit.layout.ContentPane"
+                     data-dojo-props="region: 'right'"
+                     class="hide"
+                >
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
