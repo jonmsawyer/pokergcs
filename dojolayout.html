@@ -11,7 +11,7 @@ Fairbanks.
     <meta name="author" content="Jonathan Sawyer (jmsawyer(@)alaska.edu)" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     
-    <title>Poker Flat Web Cams</title>
+    <title>Poker Ground Control Station</title>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.11/OpenLayers.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/mootools/1.4.1/mootools-yui-compressed.js"></script>
     <!-- Dojo -->
@@ -38,11 +38,14 @@ Fairbanks.
         -moz-border-radius: 5px;
         border-radius: 5px;
     }
-    div#appLayoutLeft { margin: 0; width: 82px; }
+    div#appLayout { padding: 0; }
+    div#appLayoutCenter { margin: 0; }
+    div#appLayoutLeft { margin: 3px 0 3px 3px; width: 82px; }
     div#appLayoutBottom { padding: 10px; margin: 0; }
     div#appLayoutStatusContainer { height: 48px; }
+    div#appLayoutMap { padding: 0; }
     div#appLayoutPayloadContainer { width: 50%; overflow: hidden; }
-    div#appLayoutPayloadContainer.hidden { display: none; }
+    /* div#appLayoutPayloadContainer.hidden { display: none; } */
     div#appLayoutPayloadControls,
     div#appLayoutMapControls { height: 48px; }
     div#appLayoutStatusHideShowPayload { padding: 0; overflow: hidden; height: 48px; width: 48px; }
@@ -81,39 +84,53 @@ Fairbanks.
     </style>
     
     <script type="text/javascript">
+    window.map = null;
     dojo.ready(function() {
-      var map = new OpenLayers.Map({
-          div: "appLayoutMap",
-          theme: null,
-          controls: [
-              new OpenLayers.Control.Attribution(),
-              new OpenLayers.Control.TouchNavigation({
+        window.map = new OpenLayers.Map({
+            div: "appLayoutMap",
+            theme: null,
+            controls: [
+                new OpenLayers.Control.Attribution(),
+                new OpenLayers.Control.TouchNavigation({
                   dragPanOptions: {
                       enableKinetic: true
                   }
-              }),
-              new OpenLayers.Control.ZoomPanel()
-          ],
-          layers: [
-              new OpenLayers.Layer.OSM("OpenStreetMap", null, {
+                }),
+                new OpenLayers.Control.ZoomPanel()
+            ],
+            layers: [
+                new OpenLayers.Layer.OSM("OpenStreetMap", null, {
                   transitionEffect: "resize"
-              })
-          ],
-          center: new OpenLayers.LonLat(0, 0),
-          zoom: 1
-      });
+                })
+            ],
+            center: new OpenLayers.LonLat(0, 0),
+            zoom: 1
+        });
+        
+        var status = $('appLayoutStatusHideShowPayload');
+        var payload = $('appLayoutPayloadContainer');
+        var mapContainer = $('appLayoutMapContainer');
+        window.payloadWidget = dijit.byId('appLayoutPayloadContainer');
+        status.addEvent('click', function() {
+            if (payload.hasClass('hidden')) {
+                dijit.byId('appLayoutCenter').addChild(window.payloadWidget);
+                $('appLayoutStatusHideShowPayload').title = "Click hide payload.";
+            }
+            else {
+                dijit.byId('appLayoutCenter').removeChild(window.payloadWidget);
+                $('appLayoutStatusHideShowPayload').title = "Click to show payload.";
+            }
+            window.map.render('appLayoutMap');
+            payload.toggleClass('hidden');
+            status.toggleClass('show');
+            status.toggleClass('hide');
+        });
       
-      var status = $('appLayoutStatusHideShowPayload');
-      var payload = $('appLayoutPayloadContainer');
-      var mapContainer = $('appLayoutMapContainer');
-      window.payloadDom = dijit.byId('appLayoutPayloadContainer');
-      status.addEvent('click', function() {
-          payload.toggleClass('hidden');
-          status.toggleClass('show');
-          status.toggleClass('hide');
-      });
-      
-      $$('.app_button').each(function(btn) { btn.addEvent('click', function(evt) { alert('hi, you clicked an app button!'); }); });
+        $$('.app_button').each(function(btn) {
+            btn.addEvent('click', function(evt) {
+                alert('hi, you clicked an app button!');
+            });
+        });
     });
     </script>
 </head>
@@ -124,14 +141,14 @@ Fairbanks.
      >
         <div id="appLayoutLeft"
              data-dojo-type="dijit.layout.ContentPane"
-             data-dojo-props="region: 'left'"
+             data-dojo-props="region: 'left', splitter: false"
         >
             App buttons<br />
-            <img src="img/app_icon.png" class="app_button" /><br />
-            <img src="img/app_icon.png" class="app_button" /><br />
-            <img src="img/app_icon.png" class="app_button" /><br />
-            <img src="img/app_icon.png" class="app_button" /><br />
-            <img src="img/app_icon.png" class="app_button" />
+            <img src="img/app_icon.png" class="app_button" title="dynamic flight" /><br />
+            <img src="img/app_icon.png" class="app_button" title="planned flight" /><br />
+            <img src="img/app_icon.png" class="app_button" title="options" /><br />
+            <img src="img/app_icon.png" class="app_button" title="payload options" /><br />
+            <img src="img/app_icon.png" class="app_button" title="what else?" />
         </div>
 
         <div id="appLayoutCenter"
@@ -187,6 +204,7 @@ Fairbanks.
                      data-dojo-type="dijit.layout.ContentPane"
                      data-dojo-props="region: 'right'"
                      class="hide"
+                     title="Click to hide payload."
                 >
                 </div>
             </div>
