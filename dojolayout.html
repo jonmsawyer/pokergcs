@@ -44,6 +44,17 @@ Fairbanks.
     div#appLayoutBottom { padding: 10px; margin: 0; }
     div#appLayoutStatusContainer { height: 48px; }
     div#appLayoutMap { padding: 0; }
+    div#appLayoutMapZoom { width: 48px; padding: 0; }
+    div#appLayoutMapZoomIn,
+    div#appLayoutMapZoomBar,
+    div#appLayoutMapZoomOut { margin: 0; padding: 0; }
+    div#appLayoutMapZoomIn,
+    div#appLayoutMapZoomOut { height: 48px; }
+    div#appLayoutMapZoomIn { background: url('img/in.png') no-repeat center; }
+    div#appLayoutMapZoomOut { background: url('img/out.png') no-repeat center; }
+    div#appLayoutMapZoomBar .level { margin: 0; padding: 0; height: 6.17%; background-color: #eee; }
+    div#appLayoutMapZoomBar .level:hover { background-color: yellow; }
+    div#appLayoutMapZoomBar { background-color: #eee; }
     div#appLayoutPayloadContainer { width: 50%; overflow: hidden; }
     /* div#appLayoutPayloadContainer.hidden { display: none; } */
     div#appLayoutPayloadControls,
@@ -126,11 +137,9 @@ Fairbanks.
             status.toggleClass('hide');
         });
       
-        $$('.app_button').each(function(btn) {
-            btn.addEvent('click', function(evt) {
-                alert('hi, you clicked an app button!');
-            });
-        });
+        $('appButtonWaypoints').onclick = function() {
+            
+        }
     });
     </script>
 </head>
@@ -144,7 +153,7 @@ Fairbanks.
              data-dojo-props="region: 'left', splitter: false"
         >
             App buttons<br />
-            <img src="img/app_icon.png" class="app_button" title="dynamic flight" /><br />
+            <img src="img/app_icon.png" id="appButtonWaypoints" title="waypoints" /><br />
             <img src="img/app_icon.png" class="app_button" title="planned flight" /><br />
             <img src="img/app_icon.png" class="app_button" title="options" /><br />
             <img src="img/app_icon.png" class="app_button" title="payload options" /><br />
@@ -163,6 +172,42 @@ Fairbanks.
                      data-dojo-type="dijit.layout.ContentPane"
                      data-dojo-props="region: 'center'"
                 >
+                </div>
+                <div id="appLayoutMapZoom"
+                     data-dojo-type="dijit.layout.BorderContainer"
+                     data-dojo-props="region: 'right', design: 'headline'"
+                >
+                    <div id="appLayoutMapZoomIn"
+                         data-dojo-type="dijit.layout.ContentPane"
+                         data-dojo-props="region: 'top'"
+                    >
+                    </div>
+                    <div id="appLayoutMapZoomBar"
+                         data-dojo-type="dijit.layout.ContentPane"
+                         data-dojo-props="region: 'center'"
+                    >
+                        <div data-map-level="16" class="level">&nbsp;</div>
+                        <div data-map-level="15" class="level">&nbsp;</div>
+                        <div data-map-level="14" class="level">&nbsp;</div>
+                        <div data-map-level="13" class="level">&nbsp;</div>
+                        <div data-map-level="12" class="level">&nbsp;</div>
+                        <div data-map-level="11" class="level">&nbsp;</div>
+                        <div data-map-level="10" class="level">&nbsp;</div>
+                        <div data-map-level="9" class="level">&nbsp;</div>
+                        <div data-map-level="8" class="level">&nbsp;</div>
+                        <div data-map-level="7" class="level">&nbsp;</div>
+                        <div data-map-level="6" class="level">&nbsp;</div>
+                        <div data-map-level="5" class="level">&nbsp;</div>
+                        <div data-map-level="4" class="level">&nbsp;</div>
+                        <div data-map-level="3" class="level">&nbsp;</div>
+                        <div data-map-level="2" class="level">&nbsp;</div>
+                        <div data-map-level="1" class="level">&nbsp;</div>
+                    </div>
+                    <div id="appLayoutMapZoomOut"
+                         data-dojo-type="dijit.layout.ContentPane"
+                         data-dojo-props="region: 'bottom'"
+                    >
+                    </div>
                 </div>
                 <div id="appLayoutMapControls"
                      data-dojo-type="dijit.layout.ContentPane"
