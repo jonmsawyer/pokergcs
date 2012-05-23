@@ -13,7 +13,8 @@ Fairbanks.
     
     <title>Poker Ground Control Station</title>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.11/OpenLayers.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/mootools/1.4.1/mootools-yui-compressed.js"></script>
+    <script src="js/mootools-core-1.4.5-full-nocompat-yc.js"></script>
+    <script src="js/mootools-more-1.4.0.1.js"></script>
     <!-- Dojo -->
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dijit/themes/claro/claro.css" media="screen" />
     <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7.1/dojo/dojo.js"
@@ -52,9 +53,9 @@ Fairbanks.
     div#appLayoutMapZoomOut { height: 48px; }
     div#appLayoutMapZoomIn { background: url('img/in.png') no-repeat center; }
     div#appLayoutMapZoomOut { background: url('img/out.png') no-repeat center; }
-    div#appLayoutMapZoomBar .level { margin: 0; padding: 0; height: 6.17%; background-color: #eee; }
+    div#appLayoutMapZoomBar .level { margin: 0; padding: 0; background-color: #eee; border-bottom: 1px solid #B5BCC7; }
     div#appLayoutMapZoomBar .level:hover { background-color: yellow; }
-    div#appLayoutMapZoomBar { background-color: #eee; }
+    div#appLayoutMapZoomBar { background-color: #eee; overflow: hidden; }
     div#appLayoutPayloadContainer { width: 50%; overflow: hidden; }
     /* div#appLayoutPayloadContainer.hidden { display: none; } */
     div#appLayoutPayloadControls,
@@ -95,6 +96,13 @@ Fairbanks.
     </style>
     
     <script type="text/javascript">
+    function resizeZoomBarLevels() {
+        var size = $('appLayoutMapZoomBar').getDimensions();
+        Array.each($('appLayoutMapZoomBar').children, function(el) {
+            el.style.height = size.height/16 - 1 + "px";
+        });
+    }
+    
     window.map = null;
     dojo.ready(function() {
         window.map = new OpenLayers.Map({
@@ -140,6 +148,12 @@ Fairbanks.
         $('appButtonWaypoints').onclick = function() {
             
         }
+        
+        window.addEvent('resize', function() {
+            resizeZoomBarLevels();
+        });
+        
+        resizeZoomBarLevels();
     });
     </script>
 </head>
@@ -224,8 +238,12 @@ Fairbanks.
                      data-dojo-type="dijit.layout.ContentPane"
                      data-dojo-props="region: 'center'"
                 >
-                    Payload (video feed?) goes here:
-                    <iframe width="600" height="450" src="http://www.youtube.com/embed/85Kd8kEq44k" frameborder="0" allowfullscreen></iframe>
+                    Payload (video feed?) goes here:<br />
+                    <!-- <iframe width="600" height="450" src="http://www.youtube.com/embed/85Kd8kEq44k" frameborder="0" allowfullscreen></iframe> -->
+                    <video width="800" height="600" controls="controls">
+                        <source src="udp://137.229.18.180:1234" type="video/mp4" />
+                    Your browser does not support the video tag.
+                    </video> 
                 </div>
                 <div id="appLayoutPayloadControls"
                      data-dojo-type="dijit.layout.ContentPane"
