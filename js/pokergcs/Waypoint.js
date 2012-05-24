@@ -8,6 +8,4 @@ Waypoint = new Class({
     
     initialize: function(options) {
     },
-    
-    
 });

@@ -41,7 +41,7 @@ Fairbanks.
     }
     div#appLayout { padding: 0; }
     div#appLayoutCenter { margin: 0; }
-    div#appLayoutLeft { margin: 3px 0 3px 3px; width: 82px; }
+    div#appLayoutLeft { margin: 3px 0 3px 3px; width: 50px; }
     div#appLayoutBottom { padding: 10px; margin: 0; }
     div#appLayoutStatusContainer { height: 48px; }
     div#appLayoutMap { padding: 0; }
@@ -52,8 +52,11 @@ Fairbanks.
     div#appLayoutMapZoomIn,
     div#appLayoutMapZoomOut { height: 48px; }
     div#appLayoutMapZoomIn { background: url('img/in.png') no-repeat center; }
+    div#appLayoutMapZoomIn:hover { background-color: yellow; }
     div#appLayoutMapZoomOut { background: url('img/out.png') no-repeat center; }
+    div#appLayoutMapZoomOut:hover { background-color: yellow; }
     div#appLayoutMapZoomBar .level { margin: 0; padding: 0; background-color: #eee; border-bottom: 1px solid #B5BCC7; }
+    div#appLayoutMapZoomBar .level.highlight { background-color: orange; }
     div#appLayoutMapZoomBar .level:hover { background-color: yellow; }
     div#appLayoutMapZoomBar { background-color: #eee; overflow: hidden; }
     div#appLayoutPayloadContainer { width: 50%; overflow: hidden; }
@@ -64,6 +67,9 @@ Fairbanks.
     div#appLayoutStatusHideShowPayload.hide { background-image: url('img/hide_payload.png'); }
     div#appLayoutStatusHideShowPayload.show { background-image: url('img/show_payload.png'); }
     div#appLayoutMapContainer.expanded { width: auto; }
+    .appButton { background-color: #ccc; -moz-border-radius: 5px; border-radius: 5px; }
+    .appButton.clicked { background-color: orange; }
+    .appButton:hover { background-color: yellow; }
     
     html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, code, del, dfn, em, img, q, dl, dt, dd, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {margin:0;padding:0;border:0;font-weight:inherit;font-style:inherit;font-size:100%;font-family:inherit;vertical-align:baseline;}
     /*body {line-height:1.5;}*/
@@ -95,67 +101,7 @@ Fairbanks.
     table.alignright { margin: 0 0 0 auto; }
     </style>
     
-    <script type="text/javascript">
-    function resizeZoomBarLevels() {
-        var size = $('appLayoutMapZoomBar').getDimensions();
-        Array.each($('appLayoutMapZoomBar').children, function(el) {
-            el.style.height = size.height/16 - 1 + "px";
-        });
-    }
-    
-    window.map = null;
-    dojo.ready(function() {
-        window.map = new OpenLayers.Map({
-            div: "appLayoutMap",
-            theme: null,
-            controls: [
-                new OpenLayers.Control.Attribution(),
-                new OpenLayers.Control.TouchNavigation({
-                  dragPanOptions: {
-                      enableKinetic: true
-                  }
-                }),
-                new OpenLayers.Control.ZoomPanel()
-            ],
-            layers: [
-                new OpenLayers.Layer.OSM("OpenStreetMap", null, {
-                  transitionEffect: "resize"
-                })
-            ],
-            center: new OpenLayers.LonLat(0, 0),
-            zoom: 1
-        });
-        
-        var status = $('appLayoutStatusHideShowPayload');
-        var payload = $('appLayoutPayloadContainer');
-        var mapContainer = $('appLayoutMapContainer');
-        window.payloadWidget = dijit.byId('appLayoutPayloadContainer');
-        status.addEvent('click', function() {
-            if (payload.hasClass('hidden')) {
-                dijit.byId('appLayoutCenter').addChild(window.payloadWidget);
-                $('appLayoutStatusHideShowPayload').title = "Click hide payload.";
-            }
-            else {
-                dijit.byId('appLayoutCenter').removeChild(window.payloadWidget);
-                $('appLayoutStatusHideShowPayload').title = "Click to show payload.";
-            }
-            window.map.render('appLayoutMap');
-            payload.toggleClass('hidden');
-            status.toggleClass('show');
-            status.toggleClass('hide');
-        });
-      
-        $('appButtonWaypoints').onclick = function() {
-            
-        }
-        
-        window.addEvent('resize', function() {
-            resizeZoomBarLevels();
-        });
-        
-        resizeZoomBarLevels();
-    });
-    </script>
+    <script src="js/pokergcs/pokergcs.js"></script>
 </head>
 <body class="claro">
     <div id="appLayout"
@@ -166,12 +112,11 @@ Fairbanks.
              data-dojo-type="dijit.layout.ContentPane"
              data-dojo-props="region: 'left', splitter: false"
         >
-            App buttons<br />
-            <img src="img/app_icon.png" id="appButtonWaypoints" title="waypoints" /><br />
-            <img src="img/app_icon.png" class="app_button" title="planned flight" /><br />
-            <img src="img/app_icon.png" class="app_button" title="options" /><br />
-            <img src="img/app_icon.png" class="app_button" title="payload options" /><br />
-            <img src="img/app_icon.png" class="app_button" title="what else?" />
+            <img src="img/settings.png" id="appButtonSettings" class="appButton" title="Settings" /><br />
+            <img src="img/payload.png" id="appButtonPayload" class="appButton" title="Payload View" /><br />
+            <img src="img/manual.png" id="appButtonManual" class="appButton" title="Manual Flight Mode" /><br />
+            <img src="img/waypoints.png" id="appButtonWaypoints" class="appButton" title="Waypoint Flight Mode" /><br />
+            <img src="img/statistics.png" id="appButtonStatistics" class="appButton" title="Statistics" /><br />
         </div>
 
         <div id="appLayoutCenter"
@@ -240,7 +185,7 @@ Fairbanks.
                 >
                     Payload (video feed?) goes here:<br />
                     <!-- <iframe width="600" height="450" src="http://www.youtube.com/embed/85Kd8kEq44k" frameborder="0" allowfullscreen></iframe> -->
-                    <video width="800" height="600" controls="controls">
+                    <video width="640" height="480" controls="controls">
                         <source src="udp://137.229.18.180:1234" type="video/mp4" />
                     Your browser does not support the video tag.
                     </video> 
