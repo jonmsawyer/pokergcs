@@ -1,11 +1,19 @@
 /**
+ * File: Waypoint.js
+ * Author: Jonathan Sawyer
+ * Copyright: 2012, Poker Flat Research Range, University of Alaska Fairbanks
+ * License: MIT License
+ */
+
+/**
  * Class: Waypoint
  *
- * Implements Waypoints
+ * Implements Waypoints.
  */
-Waypoint = new Class({
-    options: null,
-    
-    initialize: function(options) {
+pokergcs.Waypoint = new Class({
+    /**
+     * Constructor
+     */
+    initialize: function() {
     },
 });

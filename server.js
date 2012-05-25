@@ -1,3 +1,10 @@
+/**
+ * File: server.js
+ * Author: Rayjan Wilson
+ * Copyright: 2012, Poker Flat Research Range, University of Alaska Fairbanks
+ * License: MIT License
+ */
+
 // Include the necessary modules.
 var sys = require( "util" );
 var http = require( "http" );

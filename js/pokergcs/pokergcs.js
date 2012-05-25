@@ -1,4 +1,20 @@
-pokergcs = {};
+/**
+ * File: pokergcs.js
+ * Author: Jonathan Sawyer
+ * Copyright: 2012, Poker Flat Research Range, University of Alaska Fairbanks
+ * License: MIT License
+ */
+
+pokergcs = {
+    /**
+     * Property: secondaryWidget
+     *
+     * Initialized in {pokergcs.GUI.initSecondary}. Contains the Secondary
+     * view. This form of global variable is needed so we can add and remove
+     * the widget from the view without losing it from memory.
+     */
+    secondaryWidget: null,
+};
 
 // Anonymous function to load the pokergcs Classes into the pokergcs Namespace.
 (function() {
@@ -43,9 +59,10 @@ pokergcs = {};
 dojo.ready(function() {
     // init
     pokergcs.map = new pokergcs.Map();
-    pokergcs.GUI.initPayload();
+    pokergcs.GUI.initSecondary();
     pokergcs.GUI.initWindowResizeEvent();
     pokergcs.GUI.initMapZoomInOut();
+    pokergcs.GUI.initAppButtonEvents();
     
     // do more stuff, non init
     pokergcs.GUI.resizeZoomBarLevels();

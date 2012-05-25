@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <!--
+File: dojolayout.html
 Author: Jonathan Sawyer
-Copyright (C) 2012, Poker Flat Research Range, University of Alaska Fairbanks
-All rights reserved. You may not use any portion of this code without prior written
-permission from the Poker Flat Research Range or the University of Alaska
-Fairbanks.
+Copyright: 2012, Poker Flat Research Range, University of Alaska Fairbanks
+License: MIT License.
 -->
 <html lang="en">
 <head>
@@ -21,6 +20,7 @@ Fairbanks.
             data-dojo-config="isDebug: true, parseOnLoad: true"></script>
     <script>
     // Layout
+    dojo.require('dijit.layout.TabContainer');
     dojo.require('dijit.layout.BorderContainer');
     dojo.require('dijit.layout.ContentPane');
     </script>
@@ -59,16 +59,16 @@ Fairbanks.
     div#appLayoutMapZoomBar .level.highlight { background-color: orange; }
     div#appLayoutMapZoomBar .level:hover { background-color: yellow; }
     div#appLayoutMapZoomBar { background-color: #eee; overflow: hidden; }
-    div#appLayoutPayloadContainer { width: 50%; overflow: hidden; }
-    /* div#appLayoutPayloadContainer.hidden { display: none; } */
-    div#appLayoutPayloadControls,
+    div#appLayoutSecondaryContainer { width: 50%; overflow: hidden; }
+    /* div#appLayoutSecondaryContainer.hidden { display: none; } */
+    div#appLayoutSecondaryControls,
     div#appLayoutMapControls { height: 48px; }
-    div#appLayoutStatusHideShowPayload { padding: 0; overflow: hidden; height: 48px; width: 48px; }
-    div#appLayoutStatusHideShowPayload.hide { background-image: url('img/hide_payload.png'); }
-    div#appLayoutStatusHideShowPayload.show { background-image: url('img/show_payload.png'); }
+    div#appLayoutStatusHideShowSecondary { padding: 0; overflow: hidden; height: 48px; width: 48px; }
+    div#appLayoutStatusHideShowSecondary.hide { background-image: url('img/hide_payload.png'); }
+    div#appLayoutStatusHideShowSecondary.show { background-image: url('img/show_payload.png'); }
     div#appLayoutMapContainer.expanded { width: auto; }
     .appButton { background-color: #ccc; -moz-border-radius: 5px; border-radius: 5px; }
-    .appButton.clicked { background-color: orange; }
+    .appButton.highlight { background-color: orange; }
     .appButton:hover { background-color: yellow; }
     
     html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, code, del, dfn, em, img, q, dl, dt, dd, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {margin:0;padding:0;border:0;font-weight:inherit;font-style:inherit;font-size:100%;font-family:inherit;vertical-align:baseline;}
@@ -112,11 +112,9 @@ Fairbanks.
              data-dojo-type="dijit.layout.ContentPane"
              data-dojo-props="region: 'left', splitter: false"
         >
-            <img src="img/settings.png" id="appButtonSettings" class="appButton" title="Settings" /><br />
-            <img src="img/payload.png" id="appButtonPayload" class="appButton" title="Payload View" /><br />
-            <img src="img/manual.png" id="appButtonManual" class="appButton" title="Manual Flight Mode" /><br />
-            <img src="img/waypoints.png" id="appButtonWaypoints" class="appButton" title="Waypoint Flight Mode" /><br />
+            <img src="img/payload.png" id="appButtonPayload" class="appButton highlight" title="Payload View" /><br />
             <img src="img/statistics.png" id="appButtonStatistics" class="appButton" title="Statistics" /><br />
+            <img src="img/settings.png" id="appButtonSettings" class="appButton" title="Settings" /><br />
         </div>
 
         <div id="appLayoutCenter"
@@ -145,7 +143,6 @@ Fairbanks.
                          data-dojo-type="dijit.layout.ContentPane"
                          data-dojo-props="region: 'center'"
                     >
-                        <div data-map-level="16" class="level">&nbsp;</div>
                         <div data-map-level="15" class="level">&nbsp;</div>
                         <div data-map-level="14" class="level">&nbsp;</div>
                         <div data-map-level="13" class="level">&nbsp;</div>
@@ -161,6 +158,7 @@ Fairbanks.
                         <div data-map-level="3" class="level">&nbsp;</div>
                         <div data-map-level="2" class="level">&nbsp;</div>
                         <div data-map-level="1" class="level">&nbsp;</div>
+                        <div data-map-level="0" class="level">&nbsp;</div>
                     </div>
                     <div id="appLayoutMapZoomOut"
                          data-dojo-type="dijit.layout.ContentPane"
@@ -172,29 +170,38 @@ Fairbanks.
                      data-dojo-type="dijit.layout.ContentPane"
                      data-dojo-props="region: 'bottom'"
                 >
-                    Map controls and options go here
+                    <img src="img/manual.png" id="appButtonManual" class="appButton highlight" title="Manual Flight Mode" />
+                    <img src="img/waypoints.png" id="appButtonWaypoints" class="appButton" title="Waypoint Flight Mode" />
                 </div>
             </div>
-            <div id="appLayoutPayloadContainer"
-                 data-dojo-type="dijit.layout.BorderContainer"
-                 data-dojo-props="region: 'right'"
+            <div id="appLayoutSecondaryContainer"
+                 data-dojo-type="dijit.layout.TabContainer"
+                 data-dojo-props="region: 'right', tabStrip: true"
             >
-                <div id="appLayoutPayload"
+                <div id="appLayoutPayloadTab"
                      data-dojo-type="dijit.layout.ContentPane"
-                     data-dojo-props="region: 'center'"
+                     title="Payload"
+                     selected="true"
                 >
-                    Payload (video feed?) goes here:<br />
-                    <!-- <iframe width="600" height="450" src="http://www.youtube.com/embed/85Kd8kEq44k" frameborder="0" allowfullscreen></iframe> -->
-                    <video width="640" height="480" controls="controls">
-                        <source src="udp://137.229.18.180:1234" type="video/mp4" />
-                    Your browser does not support the video tag.
-                    </video> 
+                    Payload
                 </div>
-                <div id="appLayoutPayloadControls"
+                <div id="appLayoutWaypointsTab"
                      data-dojo-type="dijit.layout.ContentPane"
-                     data-dojo-props="region: 'bottom'"
+                     title="Waypoints"
                 >
-                    Payload controls and options go here
+                    Waypoints
+                </div>
+                <div id="appLayoutStatisticsTab"
+                     data-dojo-type="dijit.layout.ContentPane"
+                     title="Statistics"
+                >
+                    Statistics
+                </div>
+                <div id="appLayoutSettingsTab"
+                     data-dojo-type="dijit.layout.ContentPane"
+                     title="Settings"
+                >
+                    Settings
                 </div>
             </div>
             <div id="appLayoutStatusContainer"
@@ -208,7 +215,7 @@ Fairbanks.
                     Status: Lat, Lon, Alt, Speed, Battery, Temp,
                     Azimuth, Roll, Pitch, Yaw
                 </div>
-                <div id="appLayoutStatusHideShowPayload"
+                <div id="appLayoutStatusHideShowSecondary"
                      data-dojo-type="dijit.layout.ContentPane"
                      data-dojo-props="region: 'right'"
                      class="hide"

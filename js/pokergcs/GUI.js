@@ -1,4 +1,11 @@
 /**
+ * File: GUI.js
+ * Author: Jonathan Sawyer
+ * Copyright: 2012, Poker Flat Research Range, University of Alaska Fairbanks
+ * License: MIT License
+ */
+
+/**
  * Namespace: GUI
  *
  * Contains static methods for manipulating the larger GUI. Smaller GUI elements
@@ -26,14 +33,17 @@ pokergcs.GUI = {
      * When the page loads or when the user clicks on the zoom in or zoom out
      * buttons, set the appropriate class on the zoom bar element that
      * represents the zoom level.
+     *
+     * Parameters:
+     * zoom - {integer} The current zoom level of the map
      */
     setGUIZoomBarLevel: function(zoom) {
         zoom = parseInt(zoom);
-        if (zoom > 16) {
-            zoom = 16;
+        if (zoom > 15) {
+            zoom = 15;
         }
-        else if (zoom < 1) {
-            zoom = 1;
+        else if (zoom < 0) {
+            zoom = 0;
         }
         // Don't worry about efficiency: just walk through all elements
         // and set the class appropriately
@@ -68,35 +78,59 @@ pokergcs.GUI = {
             el.addEvent('click', function() {
                 var level = parseInt(el.getProperty('data-map-level'));
                 pokergcs.map.map.zoomTo(level);
-                pokergcs.GUI.setGUIZoomBarLevel(pokergcs.map.map.zoom);
             });
         });
     },
     
     /**
-     * Method: initPayload
+     * Method: initSecondary
      *
-     * Ties the payload widget to the window object as well as sets the click
-     * event of the show/hide payload button.
+     * Ties the secondary view to the window object as well as sets the click
+     * event of the show/hide secondary button.
      */
-    initPayload: function() {
-        var status = $('appLayoutStatusHideShowPayload');
-        var payload = $('appLayoutPayloadContainer');
+    initSecondary: function() {
+        var status = $('appLayoutStatusHideShowSecondary');
+        var secondary = $('appLayoutSecondaryContainer');
         var mapContainer = $('appLayoutMapContainer');
-        window.payloadWidget = dijit.byId('appLayoutPayloadContainer');
+        
+        // Add to pokergcs namespace for reference later when hidden
+        pokergcs.secondaryWidget = dijit.byId('appLayoutSecondaryContainer');
+        
+        // Hide/show the secondary container, either revealing the map or
+        // showing the secondary container alongside it
         status.addEvent('click', function() {
-            if (payload.hasClass('hidden')) {
-                dijit.byId('appLayoutCenter').addChild(window.payloadWidget);
-                $('appLayoutStatusHideShowPayload').title = "Click hide payload.";
+            // We use CSS to determine the state of the buttons and elements
+            if (secondary.hasClass('hidden')) {
+                dijit.byId('appLayoutCenter').addChild(pokergcs.secondaryWidget);
+                // TODO: Change the title
+                $('appLayoutStatusHideShowSecondary').title = "Click hide secondary.";
             }
             else {
-                dijit.byId('appLayoutCenter').removeChild(window.payloadWidget);
-                $('appLayoutStatusHideShowPayload').title = "Click to show payload.";
+                dijit.byId('appLayoutCenter').removeChild(pokergcs.secondaryWidget);
+                // TODO: Change the title
+                $('appLayoutStatusHideShowSecondary').title = "Click to show secondary.";
             }
+            
+            // After the map is resized, we need to rerender it every time
             pokergcs.map.map.render('appLayoutMap');
-            payload.toggleClass('hidden');
+            
+            secondary.toggleClass('hidden');
             status.toggleClass('show');
             status.toggleClass('hide');
+        });
+        
+        // Tie the secondary container's tab clicks to the selectChild event
+        // and fire off this inline callback
+        dojo.connect(dijit.byId("appLayoutSecondaryContainer"),
+                     "selectChild",
+                     function(child){
+            Array.each(["Payload", "Statistics", "Settings"], function(el) {
+                $('appButton'+el).removeClass('highlight');
+            });
+            $('appButton'+child.title).addClass('highlight');
+            if (child.title == "Waypoints") {
+                $('appButtonManual').removeClass('highlight');
+            }
         });
     },
     
@@ -108,6 +142,47 @@ pokergcs.GUI = {
     initWindowResizeEvent: function() {
         window.addEvent('resize', function() {
             pokergcs.GUI.resizeZoomBarLevels();
+        });
+    },
+    
+    /**
+     * Method: initAppButtonEvents
+     */
+    initAppButtonEvents: function() {
+        // For these buttons, treat them normally
+        Array.each(["Payload", "Statistics", "Settings"], function(el) {
+            $('appButton'+el).addEvent('click', function() {
+                Array.each($$('.appButton'), function(button) {
+                    if (button.id == "appButtonManual" ||
+                        button.id == "appButtonWaypoints" ) { return; }
+                    button.removeClass('highlight');
+                });
+                this.addClass('highlight');
+                if (el == "Manual") { return; }
+                dijit.byId('appLayoutSecondaryContainer').selectChild(
+                    dijit.byId('appLayout'+el+'Tab')
+                );
+            });
+        });
+        
+        // Behavior changes when the manual flight mode and waypoint flight
+        // modes are selected
+        $('appButtonManual').addEvent('click', function() {
+            if ($('appButtonWaypoints').hasClass('highlight')) {
+                $('appButtonWaypoints').removeClass('highlight');
+            }
+            this.addClass('highlight');
+        });
+        
+        $('appButtonWaypoints').addEvent('click', function() {
+            $('appButtonManual').removeClass('highlight');
+            $('appButtonPayload').removeClass('highlight');
+            $('appButtonStatistics').removeClass('highlight');
+            $('appButtonSettings').removeClass('highlight');
+            this.addClass('highlight');
+            dijit.byId('appLayoutSecondaryContainer').selectChild(
+                dijit.byId('appLayoutWaypointsTab')
+            );
         });
     },
 };
