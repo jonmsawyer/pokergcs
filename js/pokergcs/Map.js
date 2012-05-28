@@ -18,6 +18,12 @@ pokergcs.Map = Class({
     map: null,
     
     /**
+     * Property: waypointControls
+     * Hold the waypoint controls for the map
+     */
+    waypointControls: null,
+    
+    /**
      * Constructor
      */
     initialize: function() {
@@ -45,6 +51,23 @@ pokergcs.Map = Class({
             center: new OpenLayers.LonLat(-16443720.03533, 9566079.5380357),
             zoom: 4
         });
+        
+        var waypointDirectLayer = new OpenLayers.Layer.Vector("Waypoint Direct Layer");
+        var waypointAreaLayer = new OpenLayers.Layer.Vector("Waypoint Area Layer");
+        
+        this.map.addLayers([waypointDirectLayer, waypointAreaLayer]);
+        //this.map.addControl(new OpenLayers.Control.MousePosition());
+        
+        this.waypointControls = {
+            line: new OpenLayers.Control.DrawFeature(waypointDirectLayer,
+                OpenLayers.Handler.Path),
+            polygon: new OpenLayers.Control.DrawFeature(waypointAreaLayer,
+                OpenLayers.Handler.Polygon),
+        };
+        
+        for (var key in this.waypointControls) {
+            this.map.addControl(this.waypointControls[key]);
+        }
         
         // Events //////////////////////////////////////////////////////////////
         
@@ -75,5 +98,75 @@ pokergcs.Map = Class({
         //  +--- object  (the OpenLayers.Map object referenced from the event)
         //  +--- type    ("zoomend")
         pokergcs.GUI.setGUIZoomBarLevel(evt.object.zoom);
+    },
+    
+    /**
+     * Method: toggleWaypointControl
+     *
+     * Toggle the waypoint control
+     *
+     * Parameters:
+     * element - {DOM element} The waypoint add button that was clicked
+     */
+    toggleWaypointControl: function(element) {
+        if (element.hasClass('disabled')) { return; }
+        if (element.id == "waypointsDirectAdd") {
+            pokergcs.GUI.normalizeAreaWaypoints();
+            element.addClass('highlight').addClass('disabled');
+            $('waypointsDirectDone').removeClass('disabled');
+        }
+        else if (element.id == "waypointsAreaAdd") {
+            pokergcs.GUI.normalizeDirectWaypoints();
+            element.addClass('highlight').addClass('disabled');
+            $('waypointsAreaDone').removeClass('disabled');
+        }
+        for (var key in this.waypointControls) {
+            var control = this.waypointControls[key];
+            if (element.getProperty('data-draw') == key &&
+                element.hasClass('highlight')) {
+                control.activate();
+            }
+            else {
+                control.deactivate();
+            }
+        }
+    },
+    
+    /**
+     * Method: confirmWaypointList
+     *
+     * Confirm the waypoint list
+     */
+    confirmWaypointList: function(element) {
+        if (element.hasClass('disabled')) { return; }
+        if (element.id == "waypointsDirectDone") {
+            element.addClass('highlight').addClass('disabled');
+            $('waypointsDirectGo').removeClass('disabled');
+        }
+        else if (element.id == "waypointsAreaDone") {
+            element.addClass('highlight').addClass('disabled');
+            $('waypointsAreaGo').removeClass('disabled');
+        }
+        for (var key in this.waypointControls) {
+            var control = this.waypointControls[key];
+            if (element.getProperty('data-draw') == key &&
+                element.hasClass('highlight')) {
+                control.finishSketch();
+            }
+            control.deactivate();
+        }
+        
+    },
+    
+    /**
+     * Method: activateWaypointList
+     *
+     * Activate the waypoint list
+     *
+     * Parameters:
+     * element - {DOM element} The waypoint "go" button was clicked
+     */
+    activateWaypointList: function(element) {
+        if (element.hasClass('disabled')) { return; }
     },
 });

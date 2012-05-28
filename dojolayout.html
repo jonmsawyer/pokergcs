@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <!--
-File: dojolayout.html
-Author: Jonathan Sawyer
-Copyright: 2012, Poker Flat Research Range, University of Alaska Fairbanks
-License: MIT License.
--->
+  - File: dojolayout.html
+  - Author: Jonathan Sawyer
+  - Copyright: 2012, Poker Flat Research Range, University of Alaska Fairbanks
+  -License: MIT License.
+ -->
 <html lang="en">
 <head>
     <meta name="author" content="Jonathan Sawyer (jmsawyer(@)alaska.edu)" />
@@ -67,9 +67,14 @@ License: MIT License.
     div#appLayoutStatusHideShowSecondary.hide { background-image: url('img/hide_payload.png'); }
     div#appLayoutStatusHideShowSecondary.show { background-image: url('img/show_payload.png'); }
     div#appLayoutMapContainer.expanded { width: auto; }
-    .appButton { background-color: #ccc; -moz-border-radius: 5px; border-radius: 5px; }
-    .appButton.highlight { background-color: orange; }
-    .appButton:hover { background-color: yellow; }
+    .appButton, .button { background-color: #ccc; -moz-border-radius: 5px; border-radius: 5px; }
+    .appButton.highlight,
+    .button.highlight { background-color: orange; }
+    .appButton:hover,
+    .button:hover { background-color: yellow; }
+    .button.disabled { opacity: 0.4; filter:alpha(opacity=40); }
+    .button.disabled:hover { background-color: #ccc; }
+    .button.disabled.highlight:hover { background-color: orange; }
     
     html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, code, del, dfn, em, img, q, dl, dt, dd, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {margin:0;padding:0;border:0;font-weight:inherit;font-style:inherit;font-size:100%;font-family:inherit;vertical-align:baseline;}
     /*body {line-height:1.5;}*/
@@ -186,10 +191,38 @@ License: MIT License.
                     Payload
                 </div>
                 <div id="appLayoutWaypointsTab"
-                     data-dojo-type="dijit.layout.ContentPane"
+                     data-dojo-type="dijit.layout.TabContainer"
                      title="Waypoints"
+                     style="padding: 8px;"
                 >
-                    Waypoints
+                    <div id="appLayoutWaypointsDirectFlight"
+                         data-dojo-type="dijit.layout.ContentPane"
+                         title="Direct Flight Mode"
+                    >
+                        <img id="waypointsDirectAdd" src="img/add.png" class="button" data-draw="line" onclick="pokergcs.map.toggleWaypointControl(this);" />
+                        <img id="waypointsDirectDone" src="img/done.png" class="button disabled" data-draw="line" onclick="pokergcs.map.confirmWaypointList(this);" />
+                        <img id="waypointsDirectGo" src="img/go.png" class="button disabled" data-draw="line"  onclick="pokergcs.map.activateWaypointList(this);" /><br />
+                        <img id="waypointsDirectBack" src="img/back.png" class="button disabled" />
+                        <img id="waypointsDirectStop" src="img/stop.png" class="button disabled" />
+                        <img id="waypointsDirectPlay" src="img/play.png" class="button disabled" />
+                        <img id="waypointsDirectPause" src="img/pause.png" class="button disabled" />
+                        <img id="waypointsDirectForward" src="img/forward.png" class="button disabled" /><br />
+                        Direct...
+                    </div>
+                    <div id="appLayoutWaypointsAreaFlight"
+                         data-dojo-type="dijit.layout.ContentPane"
+                         title="Area Coverage Flight Mode"
+                    >
+                        <img id="waypointsAreaAdd" src="img/add.png" class="button" data-draw="polygon" onclick="pokergcs.map.toggleWaypointControl(this);" />
+                        <img id="waypointsAreaDone" src="img/done.png" class="button disabled" data-draw="polygon" onclick="pokergcs.map.confirmWaypointList(this);" />
+                        <img id="waypointsAreaGo" src="img/go.png" class="button disabled" data-draw="polygon"  onclick="pokergcs.map.activateWaypointList(this);" /><br />
+                        <img id="waypointsAreaBack" src="img/back.png" class="button disabled" />
+                        <img id="waypointsAreaStop" src="img/stop.png" class="button disabled" />
+                        <img id="waypointsAreaPlay" src="img/play.png" class="button disabled" />
+                        <img id="waypointsAreaPause" src="img/pause.png" class="button disabled" />
+                        <img id="waypointsAreaForward" src="img/forward.png" class="button disabled" /><br />
+                        Area Coverage Flight Mode
+                    </div>
                 </div>
                 <div id="appLayoutStatisticsTab"
                      data-dojo-type="dijit.layout.ContentPane"

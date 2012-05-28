@@ -1,0 +1,48 @@
+uavs
+====
+id              TEXT PRIMARY KEY        UUID
+tail_number     TEXT                    varchar
+...
+
+waypoint_tracks
+===============
+id              TEXT PRIMARY KEY        UUID
+uav_id          TEXT                    Fkey UUID
+time_started    TEXT	                "YYYY-MM-DD HH:ii:ss"
+time_completed  TEXT                    "YYYY-MM-DD HH:ii:ss"
+in_progress     INTEGER                 0 | 1
+completed       INTEGER                 0 | 1
+
+waypoints
+=========
+id              TEXT PRIMARY KEY        UUID
+waypoint_tracks_id TEXT                 Fkey UUID
+sort            INTEGER                 [1, inf)
+longitude       NUMERIC                 [-180, 180]
+latitude        NUMERIC                 [-90, 90]
+altitude        NUMERIC                 [0, inf)
+completed       INTEGER                 0 | 1
+
+statistics
+==========
+id              TEXT PRIMARY KEY        UUID
+uav_id          TEXT                    Fkey UUID
+longitude       NUMERIC
+latitude        NUMERIC
+altitude        NUMERIC
+state           INTEGER  // landed, flying, etc
+battery_level   NUMERIC
+battery_max     NUMERIC
+speed           NUMERIC
+azimuth
+roll
+roll_rate
+pitch
+pitch_rate
+yaw
+yaw_rate
+
+version
+=======
+app_version     TEXT                    varchar
+db_version      INTEGER                 [1, inf)

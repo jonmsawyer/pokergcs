@@ -172,6 +172,13 @@ pokergcs.GUI = {
                 $('appButtonWaypoints').removeClass('highlight');
             }
             this.addClass('highlight');
+            pokergcs.GUI.normalizeAreaWaypoints();
+            pokergcs.GUI.normalizeDirectWaypoints();
+            if (dijit.byId('appLayoutSecondaryContainer').selectedChildWidget.id == "appLayoutWaypointsTab") {
+                dijit.byId('appLayoutSecondaryContainer').selectChild(
+                    dijit.byId('appLayoutPayloadTab')
+                );
+            }
         });
         
         $('appButtonWaypoints').addEvent('click', function() {
@@ -184,5 +191,39 @@ pokergcs.GUI = {
                 dijit.byId('appLayoutWaypointsTab')
             );
         });
+    },
+    
+    /**
+     * Method: normalizeAreaWaypoints
+     * Return area waypoint state and buttons to normal.
+     */
+    normalizeAreaWaypoints: function() {
+        $('waypointsAreaAdd').removeClass('highlight').removeClass('disabled');
+        $('waypointsAreaDone').removeClass('highlight').addClass('disabled');
+        $('waypointsAreaGo').removeClass('highlight').addClass('disabled');
+        $('waypointsAreaBack').removeClass('highlight').addClass('disabled');
+        $('waypointsAreaStop').removeClass('highlight').addClass('disabled');
+        $('waypointsAreaPlay').removeClass('highlight').addClass('disabled');
+        $('waypointsAreaPause').removeClass('highlight').addClass('disabled');
+        $('waypointsAreaForward').removeClass('highlight').addClass('disabled');
+        pokergcs.map.waypointControls.polygon.layer.destroyFeatures();
+        pokergcs.map.waypointControls.polygon.deactivate();
+    },
+    
+    /**
+     * Method: normalizeDirectWaypoints
+     * Return direct waypoint state and buttons to normal.
+     */
+    normalizeDirectWaypoints: function() {
+        $('waypointsDirectAdd').removeClass('highlight').removeClass('disabled');
+        $('waypointsDirectDone').removeClass('highlight').addClass('disabled');
+        $('waypointsDirectGo').removeClass('highlight').addClass('disabled');
+        $('waypointsDirectBack').removeClass('highlight').addClass('disabled');
+        $('waypointsDirectStop').removeClass('highlight').addClass('disabled');
+        $('waypointsDirectPlay').removeClass('highlight').addClass('disabled');
+        $('waypointsDirectPause').removeClass('highlight').addClass('disabled');
+        $('waypointsDirectForward').removeClass('highlight').addClass('disabled');
+        pokergcs.map.waypointControls.line.layer.destroyFeatures();
+        pokergcs.map.waypointControls.line.deactivate();
     },
 };
