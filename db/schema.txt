@@ -33,14 +33,15 @@ altitude        NUMERIC
 state           INTEGER  // landed, flying, etc
 battery_level   NUMERIC
 battery_max     NUMERIC
+temperature     NUMERIC
 speed           NUMERIC
-azimuth
-roll
-roll_rate
-pitch
-pitch_rate
-yaw
-yaw_rate
+azimuth         NUMERIC
+roll            NUMERIC
+roll_rate       NUMERIC
+pitch           NUMERIC
+pitch_rate      NUMERIC
+yaw             NUMERIC
+yaw_rate        NUMERIC
 
 version
 =======
