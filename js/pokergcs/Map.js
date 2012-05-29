@@ -168,5 +168,48 @@ pokergcs.Map = Class({
      */
     activateWaypointList: function(element) {
         if (element.hasClass('disabled')) { return; }
+        if (element.id == "waypointsDirectGo") {
+            element.addClass('highlight').addClass('disabled');
+            Array.each(['Back', 'Stop', 'Play', 'Pause', 'Forward'],
+                function(el) {
+                    $('waypointsDirect'+el).removeClass('disabled');
+                });
+            var control
+        }
+        else if (element.id == "waypointsAreaGo") {
+            element.addClass('highlight').addClass('disabled');
+            Array.each(['Back', 'Stop', 'Play', 'Pause', 'Forward'],
+                function(el) {
+                    $('waypointsArea'+el).removeClass('disabled');
+                });
+        }
+        for (var key in this.waypointControls) {
+            var control = this.waypointControls[key];
+            if (element.getProperty('data-draw') == key &&
+                element.hasClass('highlight')) {
+                    this.jsonPoints(
+                        control.layer.features[0].geometry.components,
+                        now.addWaypoints
+                    );
+            }
+        }
+    },
+    
+    /**
+     * Method: jsonPoints
+     *
+     * Compile a list of points into a JSON object and fire the callback with
+     * the JSON object as its argument: callback(JSONObject)
+     *
+     * Parameters:
+     * points - {Array} A list of {OpenLayers.Geometry.Point}s
+     * callback - {function} The callback to fire when data is done forming
+     */
+    jsonPoints: function(points, callback) {
+        ob = {points: []}
+        Array.each(points, function(el) {
+            ob.points.push([el.x, el.y]);
+        });
+        callback(JSON.stringify(ob));
     },
 });
