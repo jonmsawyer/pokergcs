@@ -11,7 +11,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     
     <title>Poker Ground Control Station</title>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.11/OpenLayers.js"></script>
+    <script src="js/OpenLayers-2.11/OpenLayers.js"></script>
     <script src="js/mootools-core-1.4.5-full-nocompat-yc.js"></script>
     <script src="js/mootools-more-1.4.0.1.js"></script>
     <!-- Dojo -->
@@ -108,6 +108,12 @@
     </style>
     
     <script src="js/pokergcs/pokergcs.js"></script>
+    
+    <script>
+    now.updateWaypoints = function(waypoints) {
+        console.log(waypoints);
+    };
+    </script>
 </head>
 <body class="claro">
     <div id="appLayout"

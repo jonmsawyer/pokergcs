@@ -189,6 +189,7 @@ pokergcs.Map = Class({
                 element.hasClass('highlight')) {
                     this.jsonPoints(
                         control.layer.features[0].geometry.components,
+                        key,
                         now.addWaypoints
                     );
             }
@@ -203,10 +204,11 @@ pokergcs.Map = Class({
      *
      * Parameters:
      * points - {Array} A list of {OpenLayers.Geometry.Point}s
+     * key - {String} One of 'line' or 'polygon'
      * callback - {function} The callback to fire when data is done forming
      */
-    jsonPoints: function(points, callback) {
-        ob = {points: []}
+    jsonPoints: function(points, key, callback) {
+        ob = {type: key, points: []}
         Array.each(points, function(el) {
             ob.points.push([el.x, el.y]);
         });

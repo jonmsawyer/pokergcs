@@ -46,4 +46,4 @@ yaw_rate        NUMERIC
 version
 =======
 app_version     TEXT                    varchar
-db_version      INTEGER                 [1, inf)
+db_version      INTEGER                 [0, inf)

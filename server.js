@@ -166,7 +166,14 @@ server.listen( 8080 );
     };
     
     everyone.now.addWaypoints = function(waypoints) {
-        sys.puts(waypoints);
+        sys.puts(waypoints + " from " + this.now.uuid);
+        everyone.now.filterAddWaypoints( this.now.uuid, waypoints );
+    };
+    
+    everyone.now.filterAddWaypoints = function( masterUUID, waypoints ) {
+        if (this.now.uuid != masterUUID) {
+            everyone.now.updateWaypoints( waypoints );
+        }
     };
  
 })();
