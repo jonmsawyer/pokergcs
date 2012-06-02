@@ -11,6 +11,7 @@ var http = require( "http" );
 var url = require( "url" );
 var path = require( "path" );
 var fileSystem = require( "fs" );
+var uuid = require("node-uuid");
  
  
 // ---------------------------------------------------------- //
@@ -87,12 +88,10 @@ server.listen( 8080 );
  
 // Create a local memory space for further now-configuration.
 (function(){
- 
     // Now that we have our HTTP server initialized, let's configure
     // our NowJS connector.
     var nowjs = require( "now" );
- 
- 
+    
     // After we have set up our HTTP server to serve up "Static"
     // files, we pass it off to the NowJS connector to have it
     // augment the server object. This will prepare it to serve up
@@ -104,13 +103,17 @@ server.listen( 8080 );
     // this allows variables and functions to be shared between the
     // server and the client.
     var everyone = nowjs.initialize( server );
- 
- 
+    
+    // Create the master group
+    var master = nowjs.getGroup('master');
+    
+    // Create the client group
+    var client = nowjs.getGroup('client');
+    
     // Create primary key to keep track of all the clients that
     // connect. Each one will be assigned a unique ID.
     var primaryKey = 0;
- 
- 
+    
     // When a client has connected, assign it a UUID. In the
     // context of this callback, "this" refers to the specific client
     // that is communicating with the server.
@@ -120,11 +123,10 @@ server.listen( 8080 );
     // available in the calling context.
     everyone.connected(
         function(){
-            this.now.uuid = ++primaryKey;
+            this.now.uuid = uuid.v4();
         }
     );
- 
- 
+    
     // Add a broadcast function to *every* client that they can call
     // when they want to sync the position of the draggable target.
     // In the context of this callback, "this" refers to the
@@ -171,6 +173,8 @@ server.listen( 8080 );
     };
     
     everyone.now.filterAddWaypoints = function( masterUUID, waypoints ) {
+        sys.puts("Master UUID: "+masterUUID);
+        sys.puts("this.now.uuid: "+this.now.uuid);
         if (this.now.uuid != masterUUID) {
             everyone.now.updateWaypoints( waypoints );
         }
