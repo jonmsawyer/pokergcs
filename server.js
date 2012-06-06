@@ -12,12 +12,7 @@ var url = require( "url" );
 var path = require( "path" );
 var fileSystem = require( "fs" );
 var uuid = require("node-uuid");
- 
- 
-// ---------------------------------------------------------- //
-// ---------------------------------------------------------- //
- 
- 
+
 // Create an instance of the HTTP server.
 var server = http.createServer(
     function( request, response ){
@@ -107,25 +102,61 @@ server.listen( 8080 );
     // Create the master group
     var master = nowjs.getGroup('master');
     
+    master.on('join', function() {
+        sys.puts(this.now.uuid + " joined master group");
+    });
+    
+    master.on('leave', function() {
+        sys.puts(this.now.uuid + " left master group");
+    });
+    
     // Create the client group
     var client = nowjs.getGroup('client');
+    
+    client.on('join', function() {
+        sys.puts(this.now.uuid + " joined client group");
+    });
+    
+    client.on('leave', function() {
+        sys.puts(this.now.uuid + " left client group");
+    });
     
     // Create primary key to keep track of all the clients that
     // connect. Each one will be assigned a unique ID.
     var primaryKey = 0;
     
-    // When a client has connected, assign it a UUID. In the
-    // context of this callback, "this" refers to the specific client
-    // that is communicating with the server.
-    //
-    // NOTE: This "uuid" value is NOT synced to the client; however,
-    // when the client connects to the server, this UUID will be
-    // available in the calling context.
-    everyone.connected(
-        function(){
-            this.now.uuid = uuid.v4();
+    everyone.on('connect', function() {
+        this.now.uuid = uuid.v4();
+        sys.puts("Connect this client! " + this.now.uuid);
+        //sys.puts("Checking master and client... " + master + client);
+        
+        var self = this;
+        self.client = client;
+        master.count(function(count) {
+            sys.puts("Checking self... " + self);
+            if (count > 0) {
+                this.addClient(self.now.uuid);
+            }
+            else {
+                self.client.addClient(self.now.uuid);
+            }
+        });
+    });
+    
+    everyone.on('disconnect', function() {
+        sys.puts("Disconnected client " + this.now.uuid);
+        
+/*        if (master.getClient(this.now.uuid)) {
+            master.removeUser(this.now.uuid);
         }
-    );
+        else {
+            client.removeUser(this.now.uuid);
+        }
+        
+        if (master.count() == 0) {
+            sys.puts("No users in master group...");
+        }
+*/    });
     
     // Add a broadcast function to *every* client that they can call
     // when they want to sync the position of the draggable target.
