@@ -5,219 +5,116 @@
  * License: MIT License
  */
 
-// Include the necessary modules.
-var sys = require( "util" );
-var http = require( "http" );
-var url = require( "url" );
-var path = require( "path" );
-var fileSystem = require( "fs" );
-var uuid = require("node-uuid");
+// Requires
+var sys = require("util");
+var http = require("http");
+var url = require("url");
+var path = require("path");
+var fileSystem = require("fs");
+//var uuid = require("node-uuid");
+var nowjs = require("now");
 
-// Create an instance of the HTTP server.
-var server = http.createServer(
-    function( request, response ){
- 
-        // Get the requested "script_name". This is the part of the
-        // path after the server_name.
-        var scriptName = request.url;
- 
-        // Convert the script name (expand-path) to a physical file
-        // on the local file system.
-        var requestdFilePath = path.join( process.cwd(), scriptName );
- 
-        // Read in the requested file. Remember, since all File I/O
-        // (input and output) is asynchronous in Node.js, we need to
-        // ask for the file to be read and then provide a callback
-        // for when that file data is available.
-        //
-        // NOTE: You can check to see if the file exists *before* you
-        // try to read it; but for our demo purposes, I don't see an
-        // immediate benefit since the readFile() method provides an
-        // error object.
-        fileSystem.readFile(
-            requestdFilePath,
-            "binary",
-            function( error, fileBinary ){
- 
-                // Check to see if there was a problem reading the
-                // file. If so, we'll **assume** it is a 404 error.
-                if (error){
- 
-                    // Send the file not found header.
-                    response.writeHead( 404 );
- 
-                    // Close the response.
-                    response.end();
- 
-                    // Return out of this guard statement.
-                    return;
- 
-                }
- 
-                // If we made it this far then the file was read in
-                // without a problem. Set a 200 status response.
-                response.writeHead( 200 );
- 
-                // Serve up the file binary data. When doing this, we
-                // have to set the encoding as binary (it defaults to
-                // UTF-8).
-                response.write( fileBinary, "binary" );
- 
-                // End the response.
-                response.end();
- 
-            }
-        );
- 
-    }
-);
- 
-// Point the server to listen to the given port for incoming
-// requests.
-server.listen( 8080 );
- 
- 
-// ---------------------------------------------------------- //
-// ---------------------------------------------------------- //
- 
- 
-// Create a local memory space for further now-configuration.
-(function(){
-    // Now that we have our HTTP server initialized, let's configure
-    // our NowJS connector.
-    var nowjs = require( "now" );
-    
-    // After we have set up our HTTP server to serve up "Static"
-    // files, we pass it off to the NowJS connector to have it
-    // augment the server object. This will prepare it to serve up
-    // the NowJS client module (including the appropriate port
-    // number and server name) and basically wire everything together
-    // for us.
+var port = 8000;
+
+var server = http.createServer(function(request, response){
+    var scriptName = request.url;
+
+    // Convert the script name (expand-path) to a physical file
+    // on the local file system.
+    var requestdFilePath = path.join(process.cwd(), scriptName);
+
+    // Read in the requested file. Remember, since all File I/O
+    // (input and output) is asynchronous in Node.js, we need to
+    // ask for the file to be read and then provide a callback
+    // for when that file data is available.
     //
-    // Everyone contains an object called "now" (ie. everyone.now) -
-    // this allows variables and functions to be shared between the
-    // server and the client.
-    var everyone = nowjs.initialize( server );
-    
-    // Create the master group
-    var master = nowjs.getGroup('master');
-    
-    master.on('join', function() {
-        sys.puts(this.now.uuid + " joined master group");
-    });
-    
-    master.on('leave', function() {
-        sys.puts(this.now.uuid + " left master group");
-    });
-    
-    // Create the client group
-    var client = nowjs.getGroup('client');
-    
-    client.on('join', function() {
-        sys.puts(this.now.uuid + " joined client group");
-    });
-    
-    client.on('leave', function() {
-        sys.puts(this.now.uuid + " left client group");
-    });
-    
-    // Create primary key to keep track of all the clients that
-    // connect. Each one will be assigned a unique ID.
-    var primaryKey = 0;
-    
-    everyone.on('connect', function() {
-        this.now.uuid = uuid.v4();
-        sys.puts("Connect this client! " + this.now.uuid);
-        //sys.puts("Checking master and client... " + master + client);
-        
-        var self = this;
-        self.client = client;
-        master.count(function(count) {
-            sys.puts("Checking self... " + self);
-            if (count > 0) {
-                this.addClient(self.now.uuid);
+    // NOTE: You can check to see if the file exists *before* you
+    // try to read it; but for our demo purposes, I don't see an
+    // immediate benefit since the readFile() method provides an
+    // error object.
+    fileSystem.readFile(requestdFilePath, "binary",
+        function(error, fileBinary){
+            // Check to see if there was a problem reading the
+            // file. If so, we'll **assume** it is a 404 error.
+            if (error){
+                response.writeHead(404);
+                response.end();
+                return;
             }
-            else {
-                self.client.addClient(self.now.uuid);
-            }
-        });
-    });
-    
-    everyone.on('disconnect', function() {
-        sys.puts("Disconnected client " + this.now.uuid);
-        
-/*        if (master.getClient(this.now.uuid)) {
-            master.removeUser(this.now.uuid);
+
+            response.writeHead(200);
+            response.write(fileBinary, "binary");
+            response.end();
+        }
+    );
+});
+ 
+server.listen(port);
+
+// "everyone" contains an object called "now" (ie. everyone.now).
+// This allows variables and functions to be shared between the
+// server and the client.
+var everyone = nowjs.initialize(server);
+
+// Create the master group
+var master = nowjs.getGroup('master');
+
+master.on('join', function(user) {
+    sys.puts(this.user.clientId + " joined master group");
+});
+
+master.on('leave', function(user) {
+    sys.puts(this.user.clientId + " left master group");
+});
+
+// Create the client group
+var client = nowjs.getGroup('client');
+
+client.on('join', function(user) {
+    sys.puts(this.user.clientId + " joined client group");
+});
+
+client.on('leave', function(user) {
+    sys.puts(this.user.clientId + " left client group");
+});
+
+everyone.on('connect', function() {
+    var self = this;
+    nowjs.getGroup("master").count(function(count) {
+        if (count == 0) {
+            self.user.group = "master";
+            nowjs.getGroup("master").addUser(self.user.clientId);
         }
         else {
-            client.removeUser(this.now.uuid);
+            self.user.group = "client";
+            nowjs.getGroup("client").addUser(self.user.clientId);
         }
-        
-        if (master.count() == 0) {
-            sys.puts("No users in master group...");
-        }
-*/    });
-    
-    // Add a broadcast function to *every* client that they can call
-    // when they want to sync the position of the draggable target.
-    // In the context of this callback, "this" refers to the
-    // specific client that is communicating with the server.
-    everyone.now.syncPosition = function( position ){
+    });
+});
+
+everyone.on('disconnect', function() {
+    nowjs.getGroup(this.user.group).removeUser(this.user.clientId);
+    if (this.user.group == "master") {
+        nowjs.getGroup("client").getUsers(function(users) {
+            if (users.length > 0) {
+                nowjs.getGroup("client").removeUser(users[0]);
+                nowjs.getGroup("master").addUser(users[0]);
+            }
+        });
+    }
+});
+
+everyone.now.addWaypoints = function(waypoints) {
+    sys.puts(waypoints + " from " + this.user.clientId);
+    everyone.now.filterAddWaypoints(this.user.clientId, waypoints);
+};
+
+everyone.now.filterAddWaypoints = function(masterUUID, waypoints) {
+    sys.puts("Master UUID: "+masterUUID);
+    sys.puts("this.user.clientId: "+this.user.clientId);
+    if (this.user.clientId != masterUUID) {
+        everyone.now.updateWaypoints(waypoints);
+    }
+};
  
-        // Now that we have the new position, we want to broadcast
-        // this back to every client except the one that sent it in
-        // the first place! As such, we want to perform a server-side
-        // filtering of the clients. To do this, we will use a filter
-        // method which filters on the UUID we assigned at connection
-        // time.
-        everyone.now.filterUpdateBroadcast( this.now.uuid, position );
- 
-    };
- 
- 
-    // We want the "update" messages to go to every client except
-    // the one that announced it (as it is taking care of that on
-    // its own site). As such, we need a way to filter our update
-    // broadcasts. By defining this filter method on the server, it
-    // allows us to cut down on some server-client communication.
-    everyone.now.filterUpdateBroadcast = function( masterUUID, position ){
- 
-        // Make sure this client is NOT the same client as the one
-        // that sent the original position broadcast.
-        if (this.now.uuid == masterUUID){
- 
-            // Return out of guard statement - we don't want to
-            // send an update message back to the sender.
-            return;
- 
-        }
- 
-        // If we've made it this far, then this client is a slave
-        // client, not a master client.
-        everyone.now.updatePosition( position );
- 
-    };
-    
-    everyone.now.addWaypoints = function(waypoints) {
-        sys.puts(waypoints + " from " + this.now.uuid);
-        everyone.now.filterAddWaypoints( this.now.uuid, waypoints );
-    };
-    
-    everyone.now.filterAddWaypoints = function( masterUUID, waypoints ) {
-        sys.puts("Master UUID: "+masterUUID);
-        sys.puts("this.now.uuid: "+this.now.uuid);
-        if (this.now.uuid != masterUUID) {
-            everyone.now.updateWaypoints( waypoints );
-        }
-    };
- 
-})();
- 
- 
-// ---------------------------------------------------------- //
-// ---------------------------------------------------------- //
- 
- 
-// Write debugging information to the console to indicate that
-// the server has been configured and is up and running.
-sys.puts( "Server is running on 8080" );
+sys.puts("Server is running on " + port);
