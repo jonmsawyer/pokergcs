@@ -1,0 +1,23 @@
+This block of C++ is responsible for getting MAVlink UAV data in and out of JavaScript.
+It builds to make a node module by just doing:
+	make
+
+
+
+
+Building node.js C++ modules generally:
+http://www.lupomontero.com/writing-node-js-modules-in-cpp/
+https://www.cloudkick.com/blog/2010/aug/23/writing-nodejs-native-extensions/
+
+Pulling v8 arguments from C++ code:
+https://developers.google.com/v8/embed
+http://stackoverflow.com/questions/7476145/converting-from-v8arguments-to-c-types
+
+Looks like calling into C++, creating a three-entry array, and returning it out to a JavaScript loop only takes about 1us.  Not bad.  No memory leaks either, which is nice.  It gets a lot slower (up to 8us) with more complex objects, but this time is 100% v8 memory allocation/garbage collection.  Annoying, but still not bad.
+
+
+CHANGE LOG:
+2012-06-10: olawlor
+Checking in initial version.  Currently does almost nothing, but it successfully returns
+a live C++ class out to JavaScript via a funky method derived from my pup technique.
+
