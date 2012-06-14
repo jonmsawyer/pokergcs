@@ -110,12 +110,22 @@
     <script src="js/pokergcs/pokergcs.js"></script>
     
     <script>
+    var group = "unknown";
+    
     now.updateWaypoints = function(waypoints) {
-        console.log(waypoints);
+        pokergcs.map.addClientWaypoints(waypoints);
     };
+    
+    now.msgClient = function(msg) {
+        console.log(msg);
+    }
+    
+    now.switchGroup = function(g) {
+        group = g;
+    }
     </script>
 </head>
-<body class="claro">
+<body class="claro" onload="now.connectMe();">
     <div id="appLayout"
          data-dojo-type="dijit.layout.BorderContainer"
          data-dojo-props="design: 'headline'"

@@ -209,9 +209,46 @@ pokergcs.Map = Class({
      */
     jsonPoints: function(points, key, callback) {
         ob = {type: key, points: []}
+        if (key == "polygon") {
+            points = points[0].components;
+        }
         Array.each(points, function(el) {
             ob.points.push([el.x, el.y]);
         });
         callback(JSON.stringify(ob));
     },
+    
+    /**
+     * Method: addClientWaypoints
+     *
+     * Adds a json string of waypoints to the direct waypoint mode line layer.
+     *
+     * Paramters:
+     * wp_json - {JSON formatted string} Looks like
+     *           '{"type":"line|area","points":[[0,0],[0,0],...]}'
+     */
+    addClientWaypoints: function(wp_json) {
+        var ob = JSON.decode(wp_json);
+        if (ob.type == "line") {
+            var points = [];
+            Array.each(ob.points, function(el) {
+                points.push(new OpenLayers.Geometry.Point(el[0], el[1]))
+            })
+            var line_string = new OpenLayers.Geometry.LineString(points);
+            var feature_vector = new OpenLayers.Feature.Vector(line_string);
+            this.waypointControls["line"].layer.removeAllFeatures();
+            this.waypointControls["line"].layer.addFeatures(feature_vector);
+        }
+        else if (ob.type == "polygon") {
+            var points = [];
+            Array.each(ob.points, function(el) {
+                points.push(new OpenLayers.Geometry.Point(el[0], el[1]));
+            });
+            var linear_ring = new OpenLayers.Geometry.LinearRing(points);
+            var polygon = new OpenLayers.Geometry.Polygon(linear_ring);
+            var feature_vector = new OpenLayers.Feature.Vector(polygon);
+            this.waypointControls["polygon"].layer.removeAllFeatures();
+            this.waypointControls["polygon"].layer.addFeatures(feature_vector);
+        }
+    }
 });

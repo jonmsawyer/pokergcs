@@ -11,14 +11,20 @@ var http = require("http");
 var url = require("url");
 var path = require("path");
 var fileSystem = require("fs");
-//var uuid = require("node-uuid");
 var nowjs = require("now");
+var Point = require("./js/Point");
 
 var port = 8000;
 
+var memory = {};
+memory.waypoints = "";
+
 var server = http.createServer(function(request, response){
     var scriptName = request.url;
-
+    if (scriptName == "/") {
+        scriptName = "/index.html";
+    }
+    
     // Convert the script name (expand-path) to a physical file
     // on the local file system.
     var requestdFilePath = path.join(process.cwd(), scriptName);
@@ -56,14 +62,22 @@ server.listen(port);
 // server and the client.
 var everyone = nowjs.initialize(server);
 
+everyone.group = "unknown";
+
 // Create the master group
 var master = nowjs.getGroup('master');
 
 master.on('join', function(user) {
+    this.user.group = "master";
+    this.now.changeGroup("master");
+    this.now.sendMsg("You are the "+this.user.group+".");
+    
+    // Debug
     sys.puts(this.user.clientId + " joined master group");
 });
 
 master.on('leave', function(user) {
+    // Debug
     sys.puts(this.user.clientId + " left master group");
 });
 
@@ -71,50 +85,67 @@ master.on('leave', function(user) {
 var client = nowjs.getGroup('client');
 
 client.on('join', function(user) {
+    this.user.group = "client";
+    this.now.changeGroup("client");
+    this.now.sendMsg("You are the "+this.user.group+".");
+    
+    // Debug
     sys.puts(this.user.clientId + " joined client group");
 });
 
 client.on('leave', function(user) {
+    // Debug
     sys.puts(this.user.clientId + " left client group");
 });
 
-everyone.on('connect', function() {
+everyone.now.connectMe = function() {
     var self = this;
     nowjs.getGroup("master").count(function(count) {
         if (count == 0) {
-            self.user.group = "master";
             nowjs.getGroup("master").addUser(self.user.clientId);
         }
         else {
-            self.user.group = "client";
             nowjs.getGroup("client").addUser(self.user.clientId);
         }
     });
-});
+    if (memory.waypoints != "") {
+        this.now.updateWaypoints(memory.waypoints);
+    }
+};
 
 everyone.on('disconnect', function() {
-    nowjs.getGroup(this.user.group).removeUser(this.user.clientId);
-    if (this.user.group == "master") {
+    // this.user.group might change on us mid-function if the group is "master"
+    var group = this.user.group;
+    sys.puts("Disconnecting group is "+group);
+    nowjs.getGroup(group).removeUser(this.user.clientId);
+    if (group == "master") {
+        sys.puts("Do something about no one being in master...");
         nowjs.getGroup("client").getUsers(function(users) {
             if (users.length > 0) {
                 nowjs.getGroup("client").removeUser(users[0]);
                 nowjs.getGroup("master").addUser(users[0]);
+                sys.puts("Good! Now there's someone in master!");
+            }
+            else {
+                sys.puts("Awww. :( There's no one in client to move to master.");
             }
         });
+        
     }
 });
 
-everyone.now.addWaypoints = function(waypoints) {
+master.now.addWaypoints = function(waypoints) {
     sys.puts(waypoints + " from " + this.user.clientId);
-    everyone.now.filterAddWaypoints(this.user.clientId, waypoints);
+    memory.waypoints = waypoints;
+    client.now.updateWaypoints(waypoints);
 };
 
-everyone.now.filterAddWaypoints = function(masterUUID, waypoints) {
-    sys.puts("Master UUID: "+masterUUID);
-    sys.puts("this.user.clientId: "+this.user.clientId);
-    if (this.user.clientId != masterUUID) {
-        everyone.now.updateWaypoints(waypoints);
-    }
-};
- 
+everyone.now.sendMsg = function(msg) {
+    this.now.msgClient("Debugging? "+msg);
+}
+
+everyone.now.changeGroup = function(group) {
+    this.now.switchGroup(group);
+}
+
 sys.puts("Server is running on " + port);
