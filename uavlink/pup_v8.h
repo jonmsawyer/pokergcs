@@ -137,6 +137,13 @@ v8::Handle<v8::Object> pup_object_into_v8(T& v)
 	  v8::String::Utf8Value utf8_value(value);
 	  return std::string(*utf8_value);
 	}
+	
+	// For some reason, strings created from JSON are "IsString",
+	//  while strings passed bare as arguments are "IsStringObject".
+	// What's the difference?
+	inline bool ObjectIsString(const v8::Handle<v8::Value> &value) {
+		return value->IsString() || value->IsStringObject();
+	}
 
 // Utility function to dump an object's type.
 inline const char *ObjectTypeString(v8::Handle<v8::Value> v) {
@@ -145,17 +152,22 @@ inline const char *ObjectTypeString(v8::Handle<v8::Value> v) {
 	if (v->IsString()) return "string";
 	if (v->IsFunction()) return "function";
 	if (v->IsArray()) return "array";
-	if (v->IsObject()) return "object";
 	if (v->IsBoolean()) return "boolean";
 	if (v->IsNumber()) return "number";
 	if (v->IsExternal()) return "external";
 	if (v->IsInt32()) return "int32";
 	if (v->IsUint32()) return "uint32";
 	if (v->IsDate()) return "date";
+	
+	/* Living inside a JavaScript object, a string is just a string.
+	  Passed as a bare parameter, it's a "stringObject". */
+	if (v->IsStringObject()) return "stringObject";
 	if (v->IsBooleanObject()) return "booleanObject";
 	if (v->IsNumberObject()) return "numberObject";
+	
 	if (v->IsNativeError()) return "nativeError";
 	if (v->IsRegExp()) return "regExp";
+	if (v->IsObject()) return "object";
 	return "type unknown by ObjectTypeString";
 }
 
@@ -201,10 +213,10 @@ public:
 	
 	/* Parse the current value as a double, or throw an error. */
 	double double_value(void) {
-		if (v->IsNumber()) {
+		if (v->IsNumber() || v->IsNumberObject()) {
 			return v->ToNumber()->Value();
 		} 
-		else if (v->IsString()) { /* parse as string */
+		else if (ObjectIsString(v)) { /* parse as string */
 			double ret=0.0;
 			std::string s=ObjectToString(v);
 			if (1!=sscanf(s.c_str(),"%lg",&ret)) /* <- HACK!  Accepts 4.3abcd */
@@ -230,7 +242,7 @@ public:
 	friend void pup(this_t &p,int &v) {p.pup(v);}
 	
 	virtual void pup(std::string &value) {
-		if (v->IsString()) { 
+		if (ObjectIsString(v)) { 
 			value=ObjectToString(v);
 		}
 		else { /* what *is* this thing? */
@@ -272,5 +284,59 @@ void pup_object_from_v8(v8::Handle<v8::Value> src,T& dest)
 	pup(p,dest);
 }
 
+
+
+/* Generic argument conversion failure handling function.  Caller must define this. */
+void arg_failure(pup_failure *p);
+
+/* Adapt functions from C++ to v8 syntax. */
+template <class Tret> // taking no arguments
+inline v8::Handle<v8::Value> cpp_to_v8(Tret (*fn)(void),const v8::Arguments& args) 
+{
+	Tret r=fn();
+	return pup_object_into_v8(r);
+}
+template <class Tret,class T0> // taking 1 argument
+inline v8::Handle<v8::Value> cpp_to_v8(Tret (*fn)(const T0 &a0),const v8::Arguments& args) 
+{
+	T0 a0;
+	try {
+		pup_object_from_v8(args[0],a0);
+		Tret r=fn(a0);
+		return pup_object_into_v8(r);
+	}
+	catch (pup_failure *p) { arg_failure(p); }
+	return v8::Null();
+}
+template <class Tret,class T0,class T1> // taking 2 arguments
+inline v8::Handle<v8::Value> cpp_to_v8(Tret (*fn)(const T0 &a0,const T1 &a1),const v8::Arguments& args) 
+{
+	T0 a0;
+	T1 a1;
+	try {
+		pup_object_from_v8(args[0],a0);
+		pup_object_from_v8(args[1],a1);
+		Tret r=fn(a0,a1);
+		return pup_object_into_v8(r);
+	}
+	catch (pup_failure *p) { arg_failure(p); }
+	return v8::Null();
+}
+template <class Tret,class T0,class T1,class T2> // taking 3 arguments
+inline v8::Handle<v8::Value> cpp_to_v8(Tret (*fn)(const T0 &a0,const T1 &a1,const T2 &a2),const v8::Arguments& args) 
+{
+	T0 a0;
+	T1 a1;
+	T2 a2;
+	try {
+		pup_object_from_v8(args[0],a0);
+		pup_object_from_v8(args[1],a1);
+		pup_object_from_v8(args[2],a2);
+		Tret r=fn(a0,a1,a2);
+		return pup_object_into_v8(r);
+	}
+	catch (pup_failure *p) { arg_failure(p); }
+	return v8::Null();
+}
 
 #endif
